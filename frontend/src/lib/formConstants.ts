@@ -36,6 +36,14 @@ export const rooms = [
   { label: "5+", value: "5+" },
 ];
 
+export const resultOptions = [
+  { label: "10", value: "10" },
+  { label: "20", value: "20" },
+  { label: "30", value: "30" },
+  { label: "40", value: "40" },
+  { label: "50", value: "50" },
+];
+
 export const marketTypes = [
   { label: "Any", value: "any" },
   { label: "Primary", value: "primary" },
@@ -54,6 +62,7 @@ export const pointsOfInterest = [
   { label: "Grocery retail", value: "grocery_retail" },
   { label: "Bus stop", value: "bus_stop" },
   { label: "Tram stop", value: "tram_stop" },
+  { label: "Driving school", value: "driving_school" },
   { label: "Kindergarten", value: "kindergarten" },
   { label: "School", value: "school" },
   { label: "Specialized school", value: "specialized_school" },

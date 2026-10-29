@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useOffers } from "#/api/useOffers";
+import { useTiledOffers } from "#/api/useTiledOffers";
 import { useDebouncedValue } from "#/hooks/use-debounced-value";
 import { createFileRoute } from "@tanstack/react-router";
 import { decodeFiltersFromURL } from "#/lib/filter-url-utils";
@@ -17,6 +17,8 @@ import MapFormBox from "#/components/map-forms/map-form-box";
 import { Button } from "#/components/ui/button";
 import { useSearchSession } from "#/api/useSearchSession";
 import ChevronDownIcon from "#/components/icons/chevron-down-icon";
+import { usePois } from "#/api/usePois";
+import MapOfferBox from "#/components/map-offer-preview/map-offer-box";
 
 export const Route = createFileRoute("/map")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -28,20 +30,23 @@ export const Route = createFileRoute("/map")({
 function MapPage() {
   const { f } = Route.useSearch();
   const decodedFilters = f ? decodeFiltersFromURL(f) : null;
-  // console.log(decodedFilters);
   const filtersExist = !!f;
 
   const { data: session } = useSearchSession(decodedFilters);
   const sessionHash = session?.sessionHash;
+  const sessionType = session?.sessionType;
 
   const [isFilterFormActive, setIsFilterFormActive] = useState(false);
+  const [isOfferBoxActive, setIsOfferBoxActive] = useState(false);
   const [viewport, setViewport] = useState<MapViewport | null>(null);
   const debouncedViewport = useDebouncedValue(viewport, 300);
-  const { data: mapData, error } = useOffers(
+  const { data: mapData, error } = useTiledOffers(
     debouncedViewport,
     sessionHash,
     filtersExist,
   );
+  console.log(mapData);
+  const { data: poisData, error: poisError } = usePois(debouncedViewport);
 
   useEffect(() => {
     if (!isFilterFormActive) {
@@ -64,7 +69,15 @@ function MapPage() {
     setIsFilterFormActive(false);
   };
 
-  if (error) {
+  const handleOfferBoxOpen = () => {
+    setIsOfferBoxActive(true);
+  };
+
+  const handleOfferBoxClose = () => {
+    setIsOfferBoxActive(false);
+  };
+
+  if (error || poisError) {
     return <p className="text-paragraph">Failed to load map</p>;
   }
 
@@ -72,6 +85,10 @@ function MapPage() {
     offers: { items: [] },
     offersInPoint: { items: [] },
     clusters: { items: [] },
+  };
+
+  const safePoisData = poisData ?? {
+    pois: [],
   };
 
   return (
@@ -104,10 +121,25 @@ function MapPage() {
             <FilterIcon />
             Filter map
           </Button>
+          {sessionHash && sessionType === "recommendation" && (
+            <Button
+              className={styles.secondaryButton}
+              variant="secondary"
+              // cornerColor="red"
+              size="large"
+              onClick={handleOfferBoxOpen}
+            >
+              See offers
+            </Button>
+          )}
         </BtnGroup>
       </SubpageHeader>
 
-      <MapContextProvider mapData={safeMapData}>
+      <MapContextProvider
+        mapData={safeMapData}
+        poisData={safePoisData}
+        sessionHash={sessionHash}
+      >
         <section className={styles.mapSection}>
           <Map onViewportChange={setViewport} />
           <MapOfferContainer />
@@ -117,6 +149,13 @@ function MapPage() {
           isActive={isFilterFormActive}
           onCloseForm={handleFilterFormClose}
         />
+        {sessionHash && sessionType === "recommendation" && (
+          <MapOfferBox
+            isActive={isOfferBoxActive}
+            onCloseOfferBox={handleOfferBoxClose}
+            sessionHash={sessionHash}
+          />
+        )}
       </MapContextProvider>
     </>
   );

@@ -19,7 +19,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/v1/offers/by-point", app.getOffersByPointHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/offer/:id", app.getOfferByIDHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/filter-limits/:city", app.getFilterLimitsHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/pois", app.getPoisHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/filters-and-recommendation", app.createFiltersAndRecommendationHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/recommendation-info/:sessionHash", app.getRecommendationInfoHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/listings/geohash", app.requireGeohashToken(app.updateListingsGeohashHandler))
 	router.NotFound = app.frontendHandler()
 
