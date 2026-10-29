@@ -1,4 +1,4 @@
-# Apartment Recommender
+# Aprts
 
 A data-driven web application for discovering apartments in Kraków based on price, location, property characteristics, and nearby points of interest.
 
